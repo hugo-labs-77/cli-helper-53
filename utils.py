@@ -1,36 +1,34 @@
 import os
 import json
-import logging
+import hashlib
 
-def load_json(file_path):
-    """Load a JSON file and return its content."""
-    if not os.path.isfile(file_path):
-        logging.error(f'File not found: {file_path}')
+def read_json_file(file_path):
+    """Reads a JSON file and returns its contents as a dictionary."""
+    try:
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f'Error reading {file_path}: {e}')
         return None
-    with open(file_path, 'r') as json_file:
-        try:
-            return json.load(json_file)
-        except json.JSONDecodeError as e:
-            logging.error(f'Error decoding JSON: {e}')
-            return None
+
+def write_json_file(file_path, data):
+    """Writes a dictionary to a JSON file."""
+    try:
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=4)
+    except IOError as e:
+        print(f'Error writing to {file_path}: {e}')
 
 
-def save_json(data, file_path):
-    """Save data to a JSON file."""
-    with open(file_path, 'w') as json_file:
-        json.dump(data, json_file, indent=4)
-        logging.info(f'Data saved to {file_path}')
+def hash_string(input_string):
+    """Returns the SHA-256 hash of a string."""
+    return hashlib.sha256(input_string.encode()).hexdigest()
 
 
-def get_file_extension(file_name):
-    """Return the file extension from a filename."""
-    return os.path.splitext(file_name)[1]
-
-
-# Example usage
-if __name__ == '__main__':
-    data = load_json('example.json')
-    if data:
-        save_json(data, 'output.json')
-    ext = get_file_extension('document.txt')
-    print(f'File extension: {ext}')
+def ensure_directory_exists(dir_path):
+    """Creates a directory if it does not exist."""
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+        print(f'Directory created: {dir_path}')
+    else:
+        print(f'Directory already exists: {dir_path}')
