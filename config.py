@@ -1,31 +1,50 @@
-import os
+from typing import Any, Dict
 
-# Application configuration settings
 class Config:
-    DEBUG = True
-    TESTING = False
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'mysecretkey')
-    DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///default.db')
-    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+    """
+    A simple configuration manager class that handles
+    loading and accessing configuration settings.
+    """
+    def __init__(self, config: Dict[str, Any]) -> None:
+        """
+        Initializes the configuration with the provided dictionary.
+        
+        :param config: A dictionary containing configuration settings.
+        """
+        self.config = config
 
-# Security settings
-class Security:
-    CSRF_ENABLED = True
-    CSRF_SECRET_KEY = os.environ.get('CSRF_SECRET_KEY', 'csrfsecret')
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Retrieves the value associated with the given key.
+        If the key does not exist, returns the default value.
+        
+        :param key: The key for the configuration setting.
+        :param default: The value to return if the key is not found.
+        :return: The value of the configuration setting or default value.
+        """
+        return self.config.get(key, default)
 
-# Email configuration
-class EmailConfig:
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true') == 'true'
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', None)
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', None)
+    def set(self, key: str, value: Any) -> None:
+        """
+        Sets the value for the given key in the configuration.
+        
+        :param key: The key for the configuration setting.
+        :param value: The value to set for the configuration setting.
+        """
+        self.config[key] = value
 
-# Load configurations
-def load_config():
-    return {
-        'debug': Config.DEBUG,
-        'testing': Config.TESTING,
-        'database_uri': Config.DATABASE_URI,
-        'log_level': Config.LOG_LEVEL
-    }
+    def remove(self, key: str) -> None:
+        """
+        Removes the key and its associated value from the configuration.
+        
+        :param key: The key to remove from the configuration.
+        """
+        self.config.pop(key, None)  
+
+    def all(self) -> Dict[str, Any]:
+        """
+        Returns all configuration settings as a dictionary.
+        
+        :return: A dictionary of all configuration settings.
+        """
+        return self.config
