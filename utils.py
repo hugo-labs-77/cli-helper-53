@@ -1,34 +1,36 @@
-import os
 import json
-import hashlib
+from typing import Any, Dict, List, Union
 
-def read_json_file(file_path):
-    """Reads a JSON file and returns its contents as a dictionary."""
+def load_json(file_path: str) -> Union[Dict[str, Any], List[Any]]:
+    """Load JSON data from a file."""
     try:
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f'Error reading {file_path}: {e}')
-        return None
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            return data
+    except FileNotFoundError:
+        print(f'Error: The file {file_path} was not found.')
+        return {}
+    except json.JSONDecodeError:
+        print(f'Error: Failed to decode JSON from the file {file_path}.')
+        return {}
 
-def write_json_file(file_path, data):
-    """Writes a dictionary to a JSON file."""
+
+def save_json(file_path: str, data: Union[Dict[str, Any], List[Any]]) -> None:
+    """Save data as JSON to a file."""
     try:
-        with open(file_path, 'w') as f:
-            json.dump(data, f, indent=4)
-    except IOError as e:
-        print(f'Error writing to {file_path}: {e}')
+        with open(file_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, indent=4)
+    except IOError:
+        print(f'Error: Could not write to the file {file_path}.')
 
 
-def hash_string(input_string):
-    """Returns the SHA-256 hash of a string."""
-    return hashlib.sha256(input_string.encode()).hexdigest()
+def update_dict(data: Dict[str, Any], updates: Dict[str, Any]) -> Dict[str, Any]:
+    """Update a dictionary with given updates."""
+    data.update(updates)
+    return data
 
 
-def ensure_directory_exists(dir_path):
-    """Creates a directory if it does not exist."""
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-        print(f'Directory created: {dir_path}')
-    else:
-        print(f'Directory already exists: {dir_path}')
+def remove_key(data: Dict[str, Any], key: str) -> Dict[str, Any]:
+    """Remove a key from a dictionary if it exists."""
+    data.pop(key, None)
+    return data
