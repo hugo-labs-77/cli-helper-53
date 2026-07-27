@@ -1,50 +1,40 @@
 import logging
 
-
-def setup_logger(name):
-    """
-    Setup a logger with a given name.
-    Includes StreamHandler for console output.
-    """
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-
-    # Create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    # Create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-
-    # Add handler to the logger
-    logger.addHandler(ch)
-    return logger
+# Configure the logger
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
-def log_info(logger, message):
-    """
-    Log an informational message.
-    """
+def log_info(message):
+    """Logs an informational message."""
     logger.info(message)
 
 
-def log_warning(logger, message):
-    """
-    Log a warning message.
-    """
+def log_warning(message):
+    """Logs a warning message."""
     logger.warning(message)
 
 
-def log_error(logger, message):
-    """
-    Log an error message.
-    """
+def log_error(message):
+    """Logs an error message."""
     logger.error(message)
 
 
-def log_critical(logger, message):
-    """
-    Log a critical error message.
-    """
-    logger.critical(message)
+def log_debug(message):
+    """Logs a debug message."""
+    logger.debug(message)
+
+
+def log_exception(exc):
+    """Logs an exception with traceback."""
+    logger.exception(exc)
+
+
+def set_log_level(level):
+    """Sets the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)."""
+    level = level.upper()
+    if level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+        logger.setLevel(getattr(logging, level))
+    else:
+        logger.warning('Attempted to set invalid log level: %s', level)
+
