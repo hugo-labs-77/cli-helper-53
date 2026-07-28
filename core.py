@@ -1,38 +1,33 @@
-import sys
-import json
+import time
 
-class InputError(Exception):
-    pass
-
-class NegativeNumberError(InputError):
-    def __init__(self, value):
-        self.value = value
-        super().__init__(f'Negative number error: {value}')
-
-class DivisionByZeroError(InputError):
+class PerformanceOptimizer:
     def __init__(self):
-        super().__init__('Division by zero error')
+        self.execution_times = []
 
-def safe_divide(a, b):
-    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
-        raise InputError('Both inputs must be numbers.')
-    if b == 0:
-        raise DivisionByZeroError()
-    return a / b
+    def time_function(self, func):
+        """Decorator to time a function's execution."""
+        def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            execution_time = end_time - start_time
+            self.execution_times.append(execution_time)
+            return result
+        return wrapper
 
-def process_input(data):
-    try:
-        a = float(data.get('a'))
-        b = float(data.get('b'))
-        if a < 0 or b < 0:
-            raise NegativeNumberError(a if a < 0 else b)
-        result = safe_divide(a, b)
-        return json.dumps({'result': result})
-    except InputError as e:
-        return json.dumps({'error': str(e)})
-    except Exception as e:
-        return json.dumps({'error': 'An unexpected error occurred.'})
+    def get_average_time(self):
+        """Returns the average execution time of decorated functions."""
+        if not self.execution_times:
+            return 0
+        return sum(self.execution_times) / len(self.execution_times)
+
+optimizer = PerformanceOptimizer()
+
+@optimizer.time_function
+def sample_function():
+    time.sleep(0.1)  # Simulate a delay
 
 if __name__ == '__main__':
-    input_data = json.loads(sys.stdin.read())
-    print(process_input(input_data))
+    for _ in range(5):
+        sample_function()
+    print(f'Average execution time: {optimizer.get_average_time()} seconds')
