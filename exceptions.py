@@ -1,58 +1,30 @@
 class CustomError(Exception):
-    """
-    Exception raised for custom errors.
-    """
-
-    def __init__(self, message: str) -> None:
-        """
-        Initializes CustomError with a message.
-        
-        :param message: Error message to display.
-        """
-        super().__init__(message)
-
+    """Base class for other exceptions."""
+    pass
 
 class ValidationError(CustomError):
-    """
-    Exception raised for validation errors.
-    """
-
-    def __init__(self, field: str, message: str) -> None:
-        """
-        Initializes ValidationError with field and message.
-        
-        :param field: The name of the field that caused the error.
-        :param message: The validation error message.
-        """
-        self.field = field
+    """Raised when a validation error occurs."""
+    def __init__(self, message: str) -> None:
+        self.message = message
         super().__init__(message)
-
 
 class NotFoundError(CustomError):
-    """
-    Exception raised when an item is not found.
-    """
-
-    def __init__(self, item_id: str) -> None:
-        """
-        Initializes NotFoundError with item ID.
-        
-        :param item_id: The ID of the item that was not found.
-        """
-        message = f"Item with ID '{item_id}' not found."
+    """Raised when a requested resource is not found."""
+    def __init__(self, resource_name: str) -> None:
+        self.resource_name = resource_name
+        message = f'Resource {resource_name} not found.'
         super().__init__(message)
 
+class PermissionDeniedError(CustomError):
+    """Raised when an action is not permitted."""
+    def __init__(self, action: str) -> None:
+        self.action = action
+        message = f'Permission denied for action: {action}'
+        super().__init__(message)
 
-class UnauthorizedAccessError(CustomError):
-    """
-    Exception raised for unauthorized access attempts.
-    """
-
-    def __init__(self, user_id: str) -> None:
-        """
-        Initializes UnauthorizedAccessError with user ID.
-        
-        :param user_id: The ID of the user who attempted unauthorized access.
-        """
-        message = f"User with ID '{user_id}' is not authorized."
+class ConfigurationError(CustomError):
+    """Raised for configuration-related errors."""
+    def __init__(self, config_item: str) -> None:
+        self.config_item = config_item
+        message = f'Configuration error with item: {config_item}'
         super().__init__(message)
