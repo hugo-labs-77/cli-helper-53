@@ -1,42 +1,37 @@
-import json
+import time
+import logging
 
-class CLIHelper:
+logging.basicConfig(level=logging.INFO)
+
+class PerformanceOptimizer:
     def __init__(self):
-        self.data = {}
+        self.execution_times = []
 
-    def load_json(self, filepath):
-        """Load JSON data from a file."""
-        try:
-            with open(filepath, 'r') as file:
-                self.data = json.load(file)
-        except FileNotFoundError:
-            print(f'Error: {filepath} not found.')
-        except json.JSONDecodeError:
-            print('Error: Failed to decode JSON.')
+    def time_execution(self, func):
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            end_time = time.time()
+            execution_time = end_time - start_time
+            self.execution_times.append(execution_time)
+            logging.info(f'Execution time for {func.__name__}: {execution_time:.4f} seconds')
+            return result
+        return wrapper
 
-    def save_json(self, filepath):
-        """Save data to a JSON file."""
-        try:
-            with open(filepath, 'w') as file:
-                json.dump(self.data, file, indent=4)
-        except IOError:
-            print('Error: Unable to write to file.')
+    @staticmethod
+    def get_average_time():
+        if not self.execution_times:
+            return 0
+        return sum(self.execution_times) / len(self.execution_times)
 
-    def get_data(self, key):
-        """Retrieve value by key from loaded JSON data."""
-        return self.data.get(key, 'Key not found')
+@PerformanceOptimizer().time_execution
+def sample_function(n):
+    total = sum(range(n))
+    return total
 
-    def set_data(self, key, value):
-        """Set a value by key in the JSON data."""
-        self.data[key] = value
-
-    def display_data(self):
-        """Print the current data in a readable format."""
-        print(json.dumps(self.data, indent=4))
-
-# Example usage:
-# cli_helper = CLIHelper()
-# cli_helper.load_json('data.json')
-# cli_helper.display_data()
-# cli_helper.set_data('new_key', 'new_value')
-# cli_helper.save_json('data.json')
+if __name__ == '__main__':
+    for i in range(1, 6):
+        sample_function(10000000)
+    optimizer = PerformanceOptimizer()
+    avg_time = optimizer.get_average_time()
+    logging.info(f'Average execution time: {avg_time:.4f} seconds')
