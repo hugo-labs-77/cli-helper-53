@@ -1,24 +1,25 @@
+import json
 import os
 
-# Configuration class to handle application settings
-class Config:
-    # Application settings
-    DEBUG = os.getenv('DEBUG', 'False') == 'True'
-    DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///app.db')
-    SECRET_KEY = os.getenv('SECRET_KEY', 'your_secret_key')
-    API_VERSION = 'v1'
+class ConfigLoader:
+    def __init__(self, default_config_path: str):
+        self.default_config_path = default_config_path
+        self.config = self.load_defaults()
 
-    @classmethod
-    def init_app(cls, app):
-        # Initialize app with config settings
-        app.config.from_object(cls)
-        
-    @classmethod
-    def get_database_uri(cls):
-        # Return the database URI
-        return cls.DATABASE_URI
+    def load_defaults(self) -> dict:
+        if os.path.exists(self.default_config_path):
+            with open(self.default_config_path, 'r') as config_file:
+                return json.load(config_file)
+        return {}
 
-    @classmethod
-    def is_debug_mode(cls):
-        # Check if the application is in debug mode
-        return cls.DEBUG
+    def get(self, key: str, default=None):
+        return self.config.get(key, default)
+
+    def update(self, new_config: dict):
+        self.config.update(new_config)
+
+# Example usage
+if __name__ == '__main__':
+    config_loader = ConfigLoader('default_config.json')
+    print(config_loader.get('some_key', 'default_value'))
+    
