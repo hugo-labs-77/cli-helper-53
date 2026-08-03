@@ -1,33 +1,29 @@
 import time
 
-class PerformanceOptimizer:
+class PerformanceOptimized:
     def __init__(self):
-        self.execution_times = []
+        self.data = []
 
-    def time_function(self, func):
-        """Decorator to time a function's execution."""
-        def wrapper(*args, **kwargs):
-            start_time = time.perf_counter()
-            result = func(*args, **kwargs)
-            end_time = time.perf_counter()
-            execution_time = end_time - start_time
-            self.execution_times.append(execution_time)
-            return result
-        return wrapper
+    def add_data(self, item):
+        self.data.append(item)
 
-    def get_average_time(self):
-        """Returns the average execution time of decorated functions."""
-        if not self.execution_times:
+    def calculate_average(self):
+        if not self.data:
             return 0
-        return sum(self.execution_times) / len(self.execution_times)
+        return sum(self.data) / len(self.data)
 
-optimizer = PerformanceOptimizer()
+    def time_execution(self, func, *args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        print(f"Execution time: {end_time - start_time:.4f} seconds")
+        return result
 
-@optimizer.time_function
-def sample_function():
-    time.sleep(0.1)  # Simulate a delay
+    def optimized_processing(self):
+        self.data = list(range(10000))
+        avg = self.time_execution(self.calculate_average)
+        print(f"Average: {avg}")
 
-if __name__ == '__main__':
-    for _ in range(5):
-        sample_function()
-    print(f'Average execution time: {optimizer.get_average_time()} seconds')
+# Example usage:
+# processor = PerformanceOptimized()
+# processor.optimized_processing()
