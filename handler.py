@@ -1,37 +1,21 @@
-import time
-import logging
+import sys
+import re
 
-logging.basicConfig(level=logging.INFO)
+def is_valid_input(user_input):
+    # Validate input to ensure it's alphanumeric
+    return bool(re.match('^[a-zA-Z0-9]+$', user_input))
 
-class PerformanceOptimizer:
-    def __init__(self):
-        self.execution_times = []
-
-    def time_execution(self, func):
-        def wrapper(*args, **kwargs):
-            start_time = time.time()
-            result = func(*args, **kwargs)
-            end_time = time.time()
-            execution_time = end_time - start_time
-            self.execution_times.append(execution_time)
-            logging.info(f'Execution time for {func.__name__}: {execution_time:.4f} seconds')
-            return result
-        return wrapper
-
-    @staticmethod
-    def get_average_time():
-        if not self.execution_times:
-            return 0
-        return sum(self.execution_times) / len(self.execution_times)
-
-@PerformanceOptimizer().time_execution
-def sample_function(n):
-    total = sum(range(n))
-    return total
+def main_loop():
+    while True:
+        user_input = input('Enter alphanumeric input (or type "exit" to quit): ')
+        if user_input.lower() == 'exit':
+            print('Exiting the program. Goodbye!')
+            break
+        if not is_valid_input(user_input):
+            print('Invalid input. Please enter only alphanumeric characters.')
+            continue
+        # Process valid input
+        print(f'You entered: {user_input}')
 
 if __name__ == '__main__':
-    for i in range(1, 6):
-        sample_function(10000000)
-    optimizer = PerformanceOptimizer()
-    avg_time = optimizer.get_average_time()
-    logging.info(f'Average execution time: {avg_time:.4f} seconds')
+    main_loop()
