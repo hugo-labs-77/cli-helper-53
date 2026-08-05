@@ -1,25 +1,25 @@
-import time
-import requests
-from requests.exceptions import RequestException
+import json
+from typing import Any, Dict, List, Union
 
-def retry_request(func, retries=3, delay=2, *args, **kwargs):
-    """Retries a network operation with exponential backoff."""
-    for i in range(retries):
-        try:
-            return func(*args, **kwargs)
-        except RequestException as e:
-            if i < retries - 1:
-                time.sleep(delay ** i)  # Exponential backoff
-                continue
-            else:
-                raise e  # Raise last exception after retries
+def load_json(file_path: str) -> Union[Dict[str, Any], List[Any]]:
+    """Load JSON data from a file."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
 
 
-# Example usage:
+def save_json(data: Union[Dict[str, Any], List[Any]], file_path: str) -> None:
+    """Save JSON data to a file."""
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
 
-if __name__ == '__main__':
-    try:
-        response = retry_request(requests.get, url='https://httpbin.org/get')
-        print(response.json())
-    except RequestException as e:
-        print(f'Failed after retries: {e}')
+
+def merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
+    """Merge two dictionaries into one."""
+    merged = dict1.copy()  # Make a copy of the first dictionary
+    merged.update(dict2)   # Update with the second dictionary
+    return merged
+
+
+def flatten_list(nested_list: List[List[Any]]) -> List[Any]:
+    """Flatten a nested list."""
+    return [item for sublist in nested_list for item in sublist]
