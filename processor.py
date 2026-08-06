@@ -1,24 +1,23 @@
-import sys
+import json
+from typing import Any, Dict, List
 
-# This function validates user input
-def validate_input(user_input):
-    if not isinstance(user_input, str) or len(user_input) == 0:
-        raise ValueError('Input must be a non-empty string')
-    return user_input
+class Processor:
+    def __init__(self, data: List[Dict[str, Any]]) -> None:
+        self.data = data
 
-# Main processing loop
-def main_loop():
-    while True:
-        try:
-            user_input = input('Enter a command: ')  # Get user input
-            validated_input = validate_input(user_input)  # Validate input
-            # Process the validated input
-            print(f'Processing command: {validated_input}')  
-        except ValueError as e:
-            print(f'Error: {e}')  # Handle validation errors
-        except KeyboardInterrupt:
-            print('\nTerminating the program. Goodbye!')
-            sys.exit(0)  # Graceful exit on Ctrl+C
+    def filter_data(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
+        filtered = []
+        for item in self.data:
+            if all(item.get(k) == v for k, v in criteria.items()):
+                filtered.append(item)
+        return filtered
 
-if __name__ == '__main__':
-    main_loop()
+    def sort_data(self, key: str, reverse: bool = False) -> List[Dict[str, Any]]:
+        return sorted(self.data, key=lambda x: x.get(key), reverse=reverse)
+
+    def to_json(self) -> str:
+        return json.dumps(self.data, indent=4)
+
+    @staticmethod
+    def from_json(json_string: str) -> List[Dict[str, Any]]:
+        return json.loads(json_string)
