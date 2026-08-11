@@ -1,35 +1,33 @@
-import os
-import json
+import time
+import requests
+from requests.exceptions import RequestException
 
-def read_json_file(file_path):
-    """Reads a JSON file and returns its content."""
-    if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"The file {file_path} does not exist.")
-    with open(file_path, 'r') as file:
-        return json.load(file)
+def retry_request(url, max_retries=3, backoff_factor=1):
+    """
+    Perform a GET request with retry logic.
 
-
-def write_json_file(file_path, data):
-    """Writes the provided data to a JSON file."""
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
-
-
-def cleanup_temp_files(temp_dir):
-    """Removes temporary files from the specified directory."""
-    if not os.path.exists(temp_dir):
-        print(f"The directory {temp_dir} does not exist.")
-        return
-    for filename in os.listdir(temp_dir):
-        file_path = os.path.join(temp_dir, filename)
+    Parameters:
+    - url: API endpoint to send the GET request to
+    - max_retries: Maximum number of retry attempts
+    - backoff_factor: Factor for exponential backoff delay
+    """
+    attempt = 0
+    while attempt < max_retries:
         try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                print(f"Removed file: {file_path}")
-        except Exception as e:
-            print(f"Error removing {file_path}: {e}")
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an error for bad responses
+            return response.json()  # Return JSON response if successful
+        except RequestException as e:
+            attempt += 1
+            if attempt == max_retries:
+                raise Exception(f'Failed after {max_retries} attempts: {e}')
+            wait_time = backoff_factor * (2 ** (attempt - 1))
+            time.sleep(wait_time)  # Wait before next retry
 
-
-def list_directory_files(dir_path):
-    """Returns a list of files in the specified directory."""
-    return [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+# Example usage (commented out) to avoid execution when imported:
+# if __name__ == '__main__':
+#     try:
+#         data = retry_request('https://api.example.com/data')
+#         print(data)
+#     except Exception as e:
+#         print(e)
