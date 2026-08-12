@@ -1,46 +1,25 @@
-# Configuration for the application
+import json
+import os
 
-# Base directory of the application
-BASE_DIR = '/path/to/application'
+class ConfigLoader:
+    def __init__(self, default_config_path, user_config_path):
+        self.default_config = self.load_config(default_config_path)
+        self.user_config = self.load_config(user_config_path)
 
-# Logging configuration
-LOGGING_CONFIG = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{'
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{'
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
+    def load_config(self, config_path):
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as file:
+                return json.load(file)
+        return {}
 
-# Database configuration
-DATABASE_CONFIG = {
-    'engine': 'django.db.backends.sqlite3',
-    'name': BASE_DIR + '/db.sqlite3',
-}
+    def get_config(self):
+        # Merge user config with defaults
+        config = self.default_config.copy()
+        config.update(self.user_config)
+        return config
 
-# API configuration
-API_CONFIG = {
-    'base_url': 'https://api.example.com',
-    'timeout': 30,
-}
+# Example of usage
+if __name__ == '__main__':
+    loader = ConfigLoader('default_config.json', 'user_config.json')
+    config = loader.get_config()
+    print(config)
