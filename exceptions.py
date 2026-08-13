@@ -1,25 +1,23 @@
 class CustomError(Exception):
-    """Base class for custom exceptions in this module."""
+    """Base class for other exceptions."""
     pass
 
 class ValidationError(CustomError):
-    """Exception raised for validation errors."""
-    def __init__(self, message, field):
+    """Raised when validation fails."""
+    def __init__(self, message):
         self.message = message
-        self.field = field
         super().__init__(self.message)
 
-class DataNotFoundError(CustomError):
-    """Exception raised when required data is not found."""
-    def __init__(self, data_key):
-        self.data_key = data_key
-        self.message = f'Data not found for key: {self.data_key}'
+class NotFoundError(CustomError):
+    """Raised when a requested resource is not found."""
+    def __init__(self, resource):
+        self.resource = resource
+        self.message = f'{resource} not found'
         super().__init__(self.message)
 
 class PermissionError(CustomError):
-    """Exception raised for permission-related issues."""
-    def __init__(self, user, action):
-        self.user = user
+    """Raised when action is not allowed."""
+    def __init__(self, action):
         self.action = action
-        self.message = f'User {self.user} does not have permission to {self.action}'
+        self.message = f'Permission denied for {action}'
         super().__init__(self.message)
