@@ -1,29 +1,44 @@
-import os
-import json
+import logging
 
-class FileError(Exception):
-    pass
+# Configure logging
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
-def read_json_file(file_path):
-    """Reads a JSON file and returns its content as a dictionary."""
-    if not os.path.isfile(file_path):
-        raise FileError(f"File not found: {file_path}")
+def divide_numbers(numerator, denominator):
     try:
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-            return data
-    except json.JSONDecodeError:
-        raise FileError(f"Error decoding JSON from file: {file_path}")
+        # Check types
+        if not isinstance(numerator, (int, float)):
+            raise TypeError('Numerator must be an int or float')
+        if not isinstance(denominator, (int, float)):
+            raise TypeError('Denominator must be an int or float')
+
+        # Check for division by zero
+        if denominator == 0:
+            raise ValueError('Cannot divide by zero')
+
+        result = numerator / denominator
+        return result
+    except TypeError as te:
+        logger.error(f'Type error: {te}')
+        return None  # or handle it as required
+    except ValueError as ve:
+        logger.error(f'Value error: {ve}')
+        return None  # or handle it as required
     except Exception as e:
-        raise FileError(f"An unexpected error occurred: {str(e)}")
+        logger.error(f'Unexpected error: {e}')
+        return None  # or handle it as required
 
 
-def write_json_file(file_path, data):
-    """Writes a dictionary to a JSON file."""
-    if not isinstance(data, dict):
-        raise ValueError("Data must be a dictionary.")
+def safe_file_open(filename, mode='r'):
     try:
-        with open(file_path, 'w') as file:
-            json.dump(data, file, indent=4)
+        with open(filename, mode) as file:
+            return file.read()
+    except FileNotFoundError:
+        logger.error(f'File not found: {filename}')
+        return None  # or handle it as required
+    except IOError as e:
+        logger.error(f'IO error: {e}')
+        return None  # or handle it as required
     except Exception as e:
-        raise FileError(f"Could not write to file: {file_path}. Error: {str(e)}")
+        logger.error(f'Unexpected error opening file: {e}')
+        return None  # or handle it as required
