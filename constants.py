@@ -1,43 +1,40 @@
-'''Constants for the CLI Helper Application'''
+import time
+import random
 
-# General application settings
-APP_NAME = 'CLI Helper'
-APP_VERSION = '1.0.0'
-APP_AUTHOR = 'Your Name'
+class RetryException(Exception):
+    pass
 
-# Exit codes
-EXIT_SUCCESS = 0
-EXIT_FAILURE = 1
+# Retry configurations
+RETRY_COUNT = 3  # Number of retries
+RETRY_DELAY = 2  # Delay between retries in seconds
 
-# Error messages
-ERROR_MESSAGES = {
-    'FILE_NOT_FOUND': 'The specified file was not found.',
-    'INVALID_COMMAND': 'The command provided is invalid.',
-    'PERMISSION_DENIED': 'You do not have permission to execute this operation.',
-}
 
-# Configuration constants
-DEFAULT_CONFIG_PATH = './config/cli_helper_config.yaml'
-MAX_RETRIES = 3
-TIMEOUT_SECONDS = 30
+def retry_on_failure(func):
+    """Decorator to retry a network operation on failure."""
+    def wrapper(*args, **kwargs):
+        for attempt in range(RETRY_COUNT):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                if attempt < RETRY_COUNT - 1:
+                    time.sleep(RETRY_DELAY)
+                    print(f'Attempt {attempt + 1} failed: {e}. Retrying...')
+                else:
+                    print('Max retries reached. Operation failed.')
+                    raise RetryException(f'Operation failed after {RETRY_COUNT} attempts') from e
+    return wrapper
 
-# Logging constants
-LOGGING_LEVEL = 'DEBUG'
-LOG_FILE_PATH = './logs/cli_helper.log'
 
-# Command constants
-COMMANDS = {
-    'START': 'start',
-    'STOP': 'stop',
-    'RESTART': 'restart',
-    'STATUS': 'status',
-}
+@retry_on_failure
+def mock_network_call():
+    """Simulates a network call that may fail."""
+    if random.choice([True, False]):
+        raise ConnectionError('Network error occurred')
+    return 'Success'
 
-# Help and usage messages
-HELP_MESSAGE = '''Usage: cli-helper [command] [options]
-Commands:
-    start    Start the CLI helper.
-    stop     Stop the CLI helper.
-    restart  Restart the CLI helper.
-    status   Show the current status.
-'''
+if __name__ == '__main__':
+    try:
+        result = mock_network_call()
+        print(result)
+    except RetryException as e:
+        print(e)
