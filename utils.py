@@ -1,33 +1,38 @@
-import time
-import requests
-from requests.exceptions import RequestException
+from typing import List, Dict, Any
 
-def retry_request(url, max_retries=3, backoff_factor=1):
+
+def calculate_average(numbers: List[float]) -> float:
     """
-    Perform a GET request with retry logic.
+    Calculate the average of a list of numbers.
 
-    Parameters:
-    - url: API endpoint to send the GET request to
-    - max_retries: Maximum number of retry attempts
-    - backoff_factor: Factor for exponential backoff delay
+    Args:
+        numbers (List[float]): A list of numbers to average.
+
+    Returns:
+        float: The average of the numbers.
     """
-    attempt = 0
-    while attempt < max_retries:
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Raise an error for bad responses
-            return response.json()  # Return JSON response if successful
-        except RequestException as e:
-            attempt += 1
-            if attempt == max_retries:
-                raise Exception(f'Failed after {max_retries} attempts: {e}')
-            wait_time = backoff_factor * (2 ** (attempt - 1))
-            time.sleep(wait_time)  # Wait before next retry
+    if not numbers:
+        raise ValueError("The list of numbers cannot be empty.")
+    return sum(numbers) / len(numbers)
 
-# Example usage (commented out) to avoid execution when imported:
-# if __name__ == '__main__':
-#     try:
-#         data = retry_request('https://api.example.com/data')
-#         print(data)
-#     except Exception as e:
-#         print(e)
+
+def flatten_dict(nested_dict: Dict[str, Any], parent_key: str = '', sep: str = '.') -> Dict[str, Any]:
+    """
+    Flatten a nested dictionary into a flat dictionary.
+
+    Args:
+        nested_dict (Dict[str, Any]): The nested dictionary to flatten.
+        parent_key (str, optional): The base key to prefix to the keys in the flattened dictionary. Defaults to ''.
+        sep (str, optional): The separator to use between keys. Defaults to '.'.
+
+    Returns:
+        Dict[str, Any]: A flat dictionary.
+    """
+    items = []
+    for k, v in nested_dict.items():
+        new_key = f'{parent_key}{sep}{k}' if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
