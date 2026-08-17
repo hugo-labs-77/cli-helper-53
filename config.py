@@ -1,48 +1,25 @@
-from typing import Dict, Any
+import json
+import os
 
-class Config:
-    """
-    A class to store configuration settings.
-    """
-    def __init__(self, settings: Dict[str, Any]) -> None:
-        """
-        Initializes the Config with given settings.
+class ConfigLoader:
+    def __init__(self, default_config_path: str):
+        self.default_config_path = default_config_path
+        self.config = self.load_defaults()
 
-        :param settings: A dictionary containing configuration settings.
-        """
-        self.settings = settings
+    def load_defaults(self) -> dict:
+        with open(self.default_config_path, 'r') as file:
+            return json.load(file)
 
-    def get(self, key: str, default: Any = None) -> Any:
-        """
-        Retrieves a setting by key.
+    def load_custom_config(self, custom_config_path: str) -> None:
+        if os.path.exists(custom_config_path):
+            with open(custom_config_path, 'r') as file:
+                custom_config = json.load(file)
+                self.config.update(custom_config)
 
-        :param key: The key for the desired setting.
-        :param default: The default value to return if the key is not found.
-        :return: The setting value or the default.
-        """
-        return self.settings.get(key, default)
+    def get_config(self) -> dict:
+        return self.config
 
-    def set(self, key: str, value: Any) -> None:
-        """
-        Sets a value in the configuration.
-
-        :param key: The key for the setting to update.
-        :param value: The new value to set for the key.
-        """
-        self.settings[key] = value
-
-    def remove(self, key: str) -> None:
-        """
-        Removes a setting by key.
-
-        :param key: The key for the setting to remove.
-        """
-        self.settings.pop(key, None)
-
-    def all_settings(self) -> Dict[str, Any]:
-        """
-        Returns all configuration settings.
-
-        :return: A dictionary of all settings.
-        """
-        return self.settings
+# Example usage:
+# config_loader = ConfigLoader('defaults.json')
+# config_loader.load_custom_config('custom.json')
+# config = config_loader.get_config()  
