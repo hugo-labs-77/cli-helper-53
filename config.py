@@ -1,25 +1,28 @@
-import json
 import os
+import json
 
-class ConfigLoader:
-    def __init__(self, default_config_path: str):
-        self.default_config_path = default_config_path
-        self.config = self.load_defaults()
+class ConfigError(Exception):
+    pass
 
-    def load_defaults(self) -> dict:
-        with open(self.default_config_path, 'r') as file:
-            return json.load(file)
+class Config:
+    def __init__(self, config_file):
+        self.config_file = config_file
+        self.config_data = self.load_config()
 
-    def load_custom_config(self, custom_config_path: str) -> None:
-        if os.path.exists(custom_config_path):
-            with open(custom_config_path, 'r') as file:
-                custom_config = json.load(file)
-                self.config.update(custom_config)
+    def load_config(self):
+        if not os.path.exists(self.config_file):
+            raise ConfigError(f'Config file not found: {self.config_file}')
+        try:
+            with open(self.config_file, 'r') as file:
+                return json.load(file)
+        except json.JSONDecodeError:
+            raise ConfigError('Error decoding JSON from the config file')
+        except Exception as e:
+            raise ConfigError(f'Unexpected error: {str(e)}')
 
-    def get_config(self) -> dict:
-        return self.config
+    def get(self, key, default=None):
+        return self.config_data.get(key, default)
 
-# Example usage:
-# config_loader = ConfigLoader('defaults.json')
-# config_loader.load_custom_config('custom.json')
-# config = config_loader.get_config()  
+# Example usage of the Config class if needed:
+# config = Config('config.json')
+# print(config.get('some_key', 'default_value'))
