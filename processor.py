@@ -1,27 +1,35 @@
-import json
-import os
-from constants import CONFIG_PATH
-from logger import logger
+import time
+import requests
+from requests.exceptions import RequestException
 
-class DataProcessor:
-    def __init__(self, data):
-        self.data = data
-        logger.info('DataProcessor initialized')
+class NetworkOperation:
+    def __init__(self, max_retries=3, backoff_factor=1):
+        self.max_retries = max_retries
+        self.backoff_factor = backoff_factor
 
-    def process_data(self):
-        logger.info('Starting data processing')
-        # Implementation of data processing logic
-        processed = {key: self.data[key] for key in self.data if key != 'exclude'}
-        logger.info('Data processing finished')
-        return processed
+    def retry_request(self, url):
+        attempts = 0
+        while attempts < self.max_retries:
+            try:
+                response = requests.get(url)
+                response.raise_for_status()  # Raise an error for bad responses
+                return response.json()  # Assuming response is JSON
+            except RequestException as e:
+                attempts += 1
+                if attempts == self.max_retries:
+                    print(f'Failed after {attempts} attempts: {e}')
+                    raise
+                else:
+                    wait_time = self.backoff_factor * (2 ** (attempts - 1))
+                    print(f'Retrying in {wait_time} seconds...')
+                    time.sleep(wait_time)
+        return None  # Optional: Safeguard return
 
-    def save_to_file(self, filename):
-        with open(filename, 'w') as file:
-            json.dump(self.data, file)
-        logger.info(f'Data saved to {filename}')
-
+# Example usage
 if __name__ == '__main__':
-    sample_data = {'value1': 100, 'value2': 200, 'exclude': 300}
-    processor = DataProcessor(sample_data)
-    processed_data = processor.process_data()
-    processor.save_to_file(os.path.join(CONFIG_PATH, 'output.json'))
+    net_ops = NetworkOperation(max_retries=5, backoff_factor=1)
+    try:
+        result = net_ops.retry_request('https://api.example.com/data')
+        print(result)
+    except Exception as e:
+        print(f'Error occurred: {e}')
