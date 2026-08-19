@@ -1,29 +1,27 @@
 import time
 
-class PerformanceOptimized:
+class PerformanceOptimizer:
     def __init__(self):
-        self.data = []
+        self.execution_time = 0
 
-    def add_data(self, item):
-        self.data.append(item)
+    def timed_execution(self, func):
+        """Decorator to time a function's execution."""
+        def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            self.execution_time = end_time - start_time
+            print(f"Execution time: {self.execution_time:.4f} seconds")
+            return result
+        return wrapper
 
-    def calculate_average(self):
-        if not self.data:
-            return 0
-        return sum(self.data) / len(self.data)
+    @timed_execution
+    def process_data(self, data):
+        """Simulated processing of data with a time delay."""
+        time.sleep(2)  # Simulating time-consuming computation
+        return [d * 2 for d in data]  # Example data processing step
 
-    def time_execution(self, func, *args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        print(f"Execution time: {end_time - start_time:.4f} seconds")
-        return result
-
-    def optimized_processing(self):
-        self.data = list(range(10000))
-        avg = self.time_execution(self.calculate_average)
-        print(f"Average: {avg}")
-
-# Example usage:
-# processor = PerformanceOptimized()
-# processor.optimized_processing()
+if __name__ == '__main__':
+    optimizer = PerformanceOptimizer()
+    result = optimizer.process_data([1, 2, 3, 4])
+    print(f"Processed data: {result}")
