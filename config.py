@@ -1,28 +1,32 @@
-import os
 import json
+import os
 
-class ConfigError(Exception):
-    pass
+DEFAULT_CONFIG = {
+    'host': 'localhost',
+    'port': 8000,
+    'debug': True,
+    'database_url': 'sqlite:///default.db'
+}
 
-class Config:
-    def __init__(self, config_file):
-        self.config_file = config_file
-        self.config_data = self.load_config()
+class ConfigLoader:
+    def __init__(self, config_path=None):
+        self.config_path = config_path or 'config.json'
+        self.config = self.load_config()
 
     def load_config(self):
-        if not os.path.exists(self.config_file):
-            raise ConfigError(f'Config file not found: {self.config_file}')
-        try:
-            with open(self.config_file, 'r') as file:
-                return json.load(file)
-        except json.JSONDecodeError:
-            raise ConfigError('Error decoding JSON from the config file')
-        except Exception as e:
-            raise ConfigError(f'Unexpected error: {str(e)}')
+        if os.path.exists(self.config_path):
+            with open(self.config_path, 'r') as file:
+                try:
+                    user_config = json.load(file)
+                    return {**DEFAULT_CONFIG, **user_config}
+                except json.JSONDecodeError:
+                    print(f'Error: Invalid JSON in {self.config_path}')
+                    return DEFAULT_CONFIG
+        return DEFAULT_CONFIG
 
-    def get(self, key, default=None):
-        return self.config_data.get(key, default)
+    def get(self, key):
+        return self.config.get(key, None)
 
-# Example usage of the Config class if needed:
-# config = Config('config.json')
-# print(config.get('some_key', 'default_value'))
+if __name__ == '__main__':
+    config_loader = ConfigLoader()
+    print(config_loader.config)  # Print loaded configuration for debugging
